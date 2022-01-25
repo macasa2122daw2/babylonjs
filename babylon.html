@@ -43,12 +43,40 @@
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 0, 0));
             //AÑADIMOS SONIDO AMBIENTAL
             //const sound = new BABYLON.Sound("futbol", "./sources/audiofutbol.mp3", scene, null, { loop: true, autoplay: true });
-            const coche = BABYLON.SceneLoader.ImportMeshAsync("", "sources/", "cabeza.obj", scene);
+            //CREAMOS EL SUELO
+            const ground = BABYLON.Mesh.CreateGround("ground1", 1000, 1060, 200, scene);
+            var materialGround = new BABYLON.StandardMaterial("materialGround", scene);
+            materialGround.diffuseTexture =new BABYLON.Texture("./sources/images/ground.jpg", scene);
+            ground.material=materialGround;
+
+            //CREAMOS EL CIELO DEL ESCENARIO
+            // Skybox
+            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
+            var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
+            skyboxMaterial.backFaceCulling = false;
+            var files = [
+                "./sources/images/skybox/skybox_nx.jpg",
+                "./sources/images/skybox/skybox_ny.jpg",
+                "./sources/images/skybox/skybox_nz.jpg",
+                "./sources/images/skybox/skybox_px.jpg",
+                "./sources/images/skybox/skybox_py.jpg",
+                "./sources/images/skybox/skybox_pz.jpg",
+            ];
+            skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture.CreateFromImages(files, scene);
+            skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+            skyboxMaterial.disableLighting = true;
+            skybox.material = skyboxMaterial;
+
+
+
+            const coche = BABYLON.SceneLoader.ImportMeshAsync("", "sources/", "coche.obj", scene);
+           
+
             coche.then((result) => {
-            camera.target = result.meshes[0];
+                camera.target = result.meshes[0];
             })
 
-            return scene;   
+            return scene;
         };
 
         const scene = createScene(); //Call the createScene function
