@@ -38,20 +38,20 @@
         const createScene = function () {
 
             const scene = new BABYLON.Scene(engine);
-            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, new BABYLON.Vector3(10, 0, 0));
-            camera.attachControl(canvas, true);
+            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 5, new BABYLON.Vector3(10, 5, -5));
+            camera.attachControl(canvas, false);
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 0, 0));
             //AÑADIMOS SONIDO AMBIENTAL
             //const sound = new BABYLON.Sound("futbol", "./sources/audiofutbol.mp3", scene, null, { loop: true, autoplay: true });
             //CREAMOS EL SUELO
-            const ground = BABYLON.Mesh.CreateGround("ground1", 1000, 1060, 200, scene);
+            const ground = BABYLON.Mesh.CreateGround("ground1", 100, 100, 0, scene);
             var materialGround = new BABYLON.StandardMaterial("materialGround", scene);
-            materialGround.diffuseTexture =new BABYLON.Texture("./sources/images/ground.jpg", scene);
-            ground.material=materialGround;
+            materialGround.diffuseTexture = new BABYLON.Texture("./sources/images/ground.jpg", scene);
+            ground.material = materialGround;
 
             //CREAMOS EL CIELO DEL ESCENARIO
             // Skybox
-            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
+            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 100.0 }, scene);
             var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
             skyboxMaterial.backFaceCulling = false;
             var files = [
@@ -68,14 +68,36 @@
             skybox.material = skyboxMaterial;
 
 
-
             const coche = BABYLON.SceneLoader.ImportMeshAsync("", "sources/", "coche.obj", scene);
-           
-
+            //CENTRAR LA VISTA EN EL COCHE
             coche.then((result) => {
                 camera.target = result.meshes[0];
-            })
+            });
 
+            // PRUEBAS //////////////////////////////////////
+
+            //Position Animation
+            var box = BABYLON.MeshBuilder.CreateBox("box", {size: 5}, scene);
+            box.position.x = -10;
+            
+            var xSlide = new BABYLON.Animation("xSlide", "position.z", 5, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
+            var keyFramesP = [];
+            keyFramesP.push({
+                frame: 0,
+                value: 2
+            });
+           
+            keyFramesP.push({
+                frame: 4 * 5,
+                value: 80
+            });
+
+            xSlide.setKeys(keyFramesP);
+
+            scene.beginDirectAnimation(box, [xSlide], 0, 2 * 5, true);
+            /////////////////////////////////////////////////
+            // GUI
+           
             return scene;
         };
 
