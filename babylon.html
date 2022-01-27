@@ -25,6 +25,8 @@
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+
 </head>
 
 <body>
@@ -67,37 +69,110 @@
             skyboxMaterial.disableLighting = true;
             skybox.material = skyboxMaterial;
 
+            //INPUT MAP PARA QUE RECONOZCA EL TECLADO Y PUEDAS REALIZAR FUNCIONES CON EL
+            // Keyboard events
+            var inputMap = {};
+            scene.actionManager = new BABYLON.ActionManager(scene);
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, function (evt) {
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+            scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, function (evt) {
+                inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+            }));
+            /////////////////////////////////////////////////////////////////////////////
+            BABYLON.SceneLoader.ImportMesh("", "sources/coche/", "camero-2010-low-poly.obj", scene, (newMeshes) => {
+                var hero = newMeshes[0];
 
-            const coche = BABYLON.SceneLoader.ImportMeshAsync("", "sources/", "coche.obj", scene);
-            //CENTRAR LA VISTA EN EL COCHE
-            coche.then((result) => {
-                camera.target = result.meshes[0];
+                //Scale the model down        
+                //Lock camera on the character 
+                camera.target = hero;
+
+                //Hero character variables 
+                var heroSpeed = 0.03;
+                var heroSpeedBackwards = 0.01;
+                var heroRotationSpeed = 0.1;
+
+                //Rendering loop (executed for everyframe)
+                scene.onBeforeRenderObservable.add(() => {
+                    if (motor) {
+                        //Manage the movements of the character (e.g. position, direction)
+                        if (inputMap["w"]) {
+                            hero.moveWithCollisions(hero.forward);
+                        }
+                        if (inputMap["s"]) {
+                            hero.moveWithCollisions(hero.forward);
+                        }
+                        if (inputMap["a"]) {
+                            hero.rotate(BABYLON.Vector3.Up(), -heroRotationSpeed);
+                        }
+                        if (inputMap["d"]) {
+                            hero.rotate(BABYLON.Vector3.Up(), heroRotationSpeed);
+                        }
+                        if (inputMap["b"]) {
+                        }
+                    }
+                });
             });
 
             // PRUEBAS //////////////////////////////////////
 
             //Position Animation
-            var box = BABYLON.MeshBuilder.CreateBox("box", {size: 5}, scene);
+            var box = BABYLON.MeshBuilder.CreateBox("box", { size: 5 }, scene);
             box.position.x = -10;
-            
+            box.position.z = -100;
+
             var xSlide = new BABYLON.Animation("xSlide", "position.z", 5, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
             var keyFramesP = [];
             keyFramesP.push({
                 frame: 0,
-                value: 2
+                value: -100
             });
-           
             keyFramesP.push({
                 frame: 4 * 5,
                 value: 80
             });
-
             xSlide.setKeys(keyFramesP);
-
-            scene.beginDirectAnimation(box, [xSlide], 0, 2 * 5, true);
+            scene.beginDirectAnimation(box, [xSlide], 0, 4 * 5, true);
             /////////////////////////////////////////////////
-            // GUI
-           
+            //FUNCION QUE HARA QUE CUANDO LE DES AL BOTON SE ENCIENDA EL MOTOR
+            //AUDIO DEL MOTOR
+            var sonidomotor = new BABYLON.Sound("sonidomotor", "./sources/sonidomotor.mp3", scene, () => {
+                sonidomotor.pause();
+            });
+            var motor = false;
+            const motorOnOff = () => {
+                if (motor) {
+                    motor = false;
+                    sonidomotor.stop();
+                    button1.background = "red";
+                } else {
+                    motor = true;
+                    sonidomotor.play();
+                    button1.background = "green";
+                }
+            }
+            //// UI ////////////////////////////////////////
+            var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+            var button1 = BABYLON.GUI.Button.CreateSimpleButton("but1", "START/STOP");
+            button1.width = "150px"
+            button1.height = "80px";
+            button1.color = "black";
+            button1.cornerRadius = 30;
+            button1.background = "red";
+            button1.top = "500px";
+            button1.left = "500px";
+            button1.onPointerUpObservable.add(function () {
+                motorOnOff();
+            });
+            //TITULO DEL "JUEGO"
+            var textblock = new BABYLON.GUI.TextBlock("DEMO", "F1 CAR DEMO"); //CREAMOS EL TEXTBLOCK CON EL MENSAJE
+            textblock.color = "pink"; //LE ASIGNAMOS UN COLOR AL TEXTO
+            textblock.top = "-500px" //LO CUADRAMOS PARA QUE QUEDE ARRIBA
+            textblock.fontSize = "40px";//TAMAÑO DEL TEXTO QUE USAREMOS
+            advancedTexture.addControl(textblock);
+            advancedTexture.addControl(button1);
+            ////////////////////////////////////////////////
+
             return scene;
         };
 
