@@ -46,8 +46,7 @@
             const camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(8, 10, 0), scene);
             camera.attachControl(canvas, false);
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 0, 0));
-            //AÑADIMOS SONIDO AMBIENTAL
-            //const sound = new BABYLON.Sound("futbol", "./sources/audiofutbol.mp3", scene, null, { loop: true, autoplay: true });
+            light.intensity = 5.1;
             //CREAMOS EL SUELO
             const ground = BABYLON.Mesh.CreateGround("ground1", 2000, 2000, 0, scene);
             var materialGround = new BABYLON.StandardMaterial("materialGround", scene);
