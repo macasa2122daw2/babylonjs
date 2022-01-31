@@ -43,21 +43,20 @@
             const scene = new BABYLON.Scene(engine);
             //CAMARA
             //const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 5, new BABYLON.Vector3(10, 5, -5));
-            const camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(6, 0, 0), scene);
+            const camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(8, 10, 0), scene);
             camera.attachControl(canvas, false);
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 0, 0));
             //AÑADIMOS SONIDO AMBIENTAL
             //const sound = new BABYLON.Sound("futbol", "./sources/audiofutbol.mp3", scene, null, { loop: true, autoplay: true });
             //CREAMOS EL SUELO
-            //const ground = BABYLON.Mesh.CreateGround("ground1", 1000, 1000, 0, scene);
-            const ground = BABYLON.MeshBuilder.CreateGroundFromHeightMap("ground1", "https://assets.babylonjs.com/environments/villageheightmap.png", { width: 950, height: 950, subdivisions: 50, minHeight: 0, maxHeight: 10 });
+            const ground = BABYLON.Mesh.CreateGround("ground1", 2000, 2000, 0, scene);
             var materialGround = new BABYLON.StandardMaterial("materialGround", scene);
             materialGround.diffuseTexture = new BABYLON.Texture("./sources/images/ground.jpg", scene);
             ground.material = materialGround;
 
             //CREAMOS EL CIELO DEL ESCENARIO
             // Skybox
-            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
+            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 2000.0 }, scene);
             var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
             skyboxMaterial.backFaceCulling = false;
             var files = [
@@ -85,16 +84,19 @@
             }));
             /////////////////////////////////////////////////////////////////////////////
             const carro = BABYLON.SceneLoader.ImportMesh("", "sources/coche/", "camero-2010-low-poly.obj", scene, (newMeshes) => {
+            //const carro = BABYLON.SceneLoader.ImportMesh("", "sources/", "coche.obj", scene, (newMeshes) => {
                 var coche = newMeshes[0];
 
-                //Scale the model down        
+                //Scale the model down 
+                coche.scaling.scaleInPlace(15.1);
+       
                 //Lock camera on the character 
                 camera.lockedTarget = coche;
 
                 //Hero character variables 
-                var heroSpeed = 0.03;
-                var heroSpeedBackwards = 0.03;
-                var heroRotationSpeed = 0.1;
+                var heroSpeed = 0.3;
+                var heroSpeedBackwards = 0.09;
+                var heroRotationSpeed = 0.05;
 
                 //Rendering loop (executed for everyframe)
                 scene.onBeforeRenderObservable.add(() => {
@@ -102,15 +104,15 @@
                         //Manage the movements of the character (e.g. position, direction)
                         if (inputMap["w"]) {
                             coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeed));
-                            if(heroSpeed>0.3){
-                                
-                            }else{
-                                setTimeout(() => { heroSpeed=heroSpeed+0.01;}, 1000);
-                            }
-                            
+                            if(heroSpeed<1.7){
+                                setTimeout(() => { heroSpeed=heroSpeed+0.10;}, 1000);
+                            } 
+                        }
+                        if (!inputMap["w"]) {
+                            heroSpeed = 0.03;  
                         }
                         if (inputMap["s"]) {
-                            coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeedBackwards));
+                            coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeedBackwards*-10));
                         }
                         if (inputMap["a"]) {
                             coche.rotate(BABYLON.Vector3.Up(), -heroRotationSpeed);
@@ -123,6 +125,7 @@
                         }
                     }
                 });
+                
             });
 
             // PRUEBAS //////////////////////////////////////
@@ -160,7 +163,7 @@
             button1.cornerRadius = 30;
             button1.background = "red";
             button1.top = "500px";
-            button1.left = "500px";
+            button1.left = "600px";
             button1.onPointerUpObservable.add(function () {
                 motorOnOff();
             });
@@ -171,22 +174,19 @@
             textblock.fontSize = "40px";//TAMAÑO DEL TEXTO QUE USAREMOS
             advancedTexture.addControl(textblock);
             //TITULO DEL "JUEGO"
-            var controlsblock = new BABYLON.GUI.TextBlock("controlsblock", "Controls: Left A | Forward W | Backward S | Right D"); //CREAMOS EL TEXTBLOCK CON EL MENSAJE
+            var controlsblock = new BABYLON.GUI.TextBlock("controlsblock", "Controls: Left A | Forward W | Backward S | Right D | Claxon B"); //CREAMOS EL TEXTBLOCK CON EL MENSAJE
             controlsblock.color = "red"; //LE ASIGNAMOS UN COLOR AL TEXTO
             controlsblock.top = "500px" //LO CUADRAMOS PARA QUE QUEDE ARRIBA
             controlsblock.fontSize = "35px";//TAMAÑO DEL TEXTO QUE USAREMOS
             advancedTexture.addControl(controlsblock);
             advancedTexture.addControl(button1);
             ////////////////////////////////////////////////
-            //PRUEBAS
+            
             // Enable physics
             scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.OimoJSPlugin());
-            //carro.physicsImpostor = new BABYLON.PhysicsImpostor(carro, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 1 }, scene);
             ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 1 }, scene);
-
-
-
-
+            //PRUEBAS
+            console.log(carro);
             ////
             return scene;
         };
