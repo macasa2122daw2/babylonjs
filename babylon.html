@@ -26,6 +26,7 @@
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
     <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <script src="https://cdn.babylonjs.com/Oimo.js" type="text/javascript"></script>
 
 </head>
 
@@ -40,20 +41,23 @@
         const createScene = function () {
 
             const scene = new BABYLON.Scene(engine);
-            const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 5, new BABYLON.Vector3(10, 5, -5));
+            //CAMARA
+            //const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 5, new BABYLON.Vector3(10, 5, -5));
+            const camera = new BABYLON.FollowCamera("FollowCam", new BABYLON.Vector3(6, 0, 0), scene);
             camera.attachControl(canvas, false);
             const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 0, 0));
             //AÑADIMOS SONIDO AMBIENTAL
             //const sound = new BABYLON.Sound("futbol", "./sources/audiofutbol.mp3", scene, null, { loop: true, autoplay: true });
             //CREAMOS EL SUELO
-            const ground = BABYLON.Mesh.CreateGround("ground1", 100, 100, 0, scene);
+            //const ground = BABYLON.Mesh.CreateGround("ground1", 1000, 1000, 0, scene);
+            const ground = BABYLON.MeshBuilder.CreateGroundFromHeightMap("ground1", "https://assets.babylonjs.com/environments/villageheightmap.png", { width: 950, height: 950, subdivisions: 50, minHeight: 0, maxHeight: 10 });
             var materialGround = new BABYLON.StandardMaterial("materialGround", scene);
             materialGround.diffuseTexture = new BABYLON.Texture("./sources/images/ground.jpg", scene);
             ground.material = materialGround;
 
             //CREAMOS EL CIELO DEL ESCENARIO
             // Skybox
-            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 100.0 }, scene);
+            var skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, scene);
             var skyboxMaterial = new BABYLON.StandardMaterial("skyBox", scene);
             skyboxMaterial.backFaceCulling = false;
             var files = [
@@ -80,16 +84,16 @@
                 inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
             }));
             /////////////////////////////////////////////////////////////////////////////
-            BABYLON.SceneLoader.ImportMesh("", "sources/coche/", "camero-2010-low-poly.obj", scene, (newMeshes) => {
-                var hero = newMeshes[0];
+            const carro = BABYLON.SceneLoader.ImportMesh("", "sources/coche/", "camero-2010-low-poly.obj", scene, (newMeshes) => {
+                var coche = newMeshes[0];
 
                 //Scale the model down        
                 //Lock camera on the character 
-                camera.target = hero;
+                camera.lockedTarget = coche;
 
                 //Hero character variables 
                 var heroSpeed = 0.03;
-                var heroSpeedBackwards = 0.01;
+                var heroSpeedBackwards = 0.03;
                 var heroRotationSpeed = 0.1;
 
                 //Rendering loop (executed for everyframe)
@@ -97,18 +101,25 @@
                     if (motor) {
                         //Manage the movements of the character (e.g. position, direction)
                         if (inputMap["w"]) {
-                            hero.moveWithCollisions(hero.forward);
+                            coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeed));
+                            if(heroSpeed>0.3){
+                                
+                            }else{
+                                setTimeout(() => { heroSpeed=heroSpeed+0.01;}, 1000);
+                            }
+                            
                         }
                         if (inputMap["s"]) {
-                            hero.moveWithCollisions(hero.forward);
+                            coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeedBackwards));
                         }
                         if (inputMap["a"]) {
-                            hero.rotate(BABYLON.Vector3.Up(), -heroRotationSpeed);
+                            coche.rotate(BABYLON.Vector3.Up(), -heroRotationSpeed);
                         }
                         if (inputMap["d"]) {
-                            hero.rotate(BABYLON.Vector3.Up(), heroRotationSpeed);
+                            coche.rotate(BABYLON.Vector3.Up(), heroRotationSpeed);
                         }
                         if (inputMap["b"]) {
+                            sonidoclaxon.play();
                         }
                     }
                 });
@@ -116,26 +127,15 @@
 
             // PRUEBAS //////////////////////////////////////
 
-            //Position Animation
-            var box = BABYLON.MeshBuilder.CreateBox("box", { size: 5 }, scene);
-            box.position.x = -10;
-            box.position.z = -100;
-
-            var xSlide = new BABYLON.Animation("xSlide", "position.z", 5, BABYLON.Animation.ANIMATIONTYPE_FLOAT, BABYLON.Animation.ANIMATIONLOOPMODE_CYCLE);
-            var keyFramesP = [];
-            keyFramesP.push({
-                frame: 0,
-                value: -100
-            });
-            keyFramesP.push({
-                frame: 4 * 5,
-                value: 80
-            });
-            xSlide.setKeys(keyFramesP);
-            scene.beginDirectAnimation(box, [xSlide], 0, 4 * 5, true);
             /////////////////////////////////////////////////
             //FUNCION QUE HARA QUE CUANDO LE DES AL BOTON SE ENCIENDA EL MOTOR
             //AUDIO DEL MOTOR
+            var sonidoclaxon = new BABYLON.Sound("sonidoclaxon", "./sources/claxon.mp3", scene, () => {
+                sonidoclaxon.pause();
+            });
+            var sonidoacelerar = new BABYLON.Sound("sonidoacelerar", "./sources/acelerar.mp3", scene, () => {
+                sonidoacelerar.pause();
+            });
             var sonidomotor = new BABYLON.Sound("sonidomotor", "./sources/sonidomotor.mp3", scene, () => {
                 sonidomotor.pause();
             });
@@ -165,14 +165,29 @@
                 motorOnOff();
             });
             //TITULO DEL "JUEGO"
-            var textblock = new BABYLON.GUI.TextBlock("DEMO", "F1 CAR DEMO"); //CREAMOS EL TEXTBLOCK CON EL MENSAJE
+            var textblock = new BABYLON.GUI.TextBlock("DEMO", "CAR DEMO"); //CREAMOS EL TEXTBLOCK CON EL MENSAJE
             textblock.color = "pink"; //LE ASIGNAMOS UN COLOR AL TEXTO
             textblock.top = "-500px" //LO CUADRAMOS PARA QUE QUEDE ARRIBA
             textblock.fontSize = "40px";//TAMAÑO DEL TEXTO QUE USAREMOS
             advancedTexture.addControl(textblock);
+            //TITULO DEL "JUEGO"
+            var controlsblock = new BABYLON.GUI.TextBlock("controlsblock", "Controls: Left A | Forward W | Backward S | Right D"); //CREAMOS EL TEXTBLOCK CON EL MENSAJE
+            controlsblock.color = "red"; //LE ASIGNAMOS UN COLOR AL TEXTO
+            controlsblock.top = "500px" //LO CUADRAMOS PARA QUE QUEDE ARRIBA
+            controlsblock.fontSize = "35px";//TAMAÑO DEL TEXTO QUE USAREMOS
+            advancedTexture.addControl(controlsblock);
             advancedTexture.addControl(button1);
             ////////////////////////////////////////////////
+            //PRUEBAS
+            // Enable physics
+            scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.OimoJSPlugin());
+            //carro.physicsImpostor = new BABYLON.PhysicsImpostor(carro, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, restitution: 1 }, scene);
+            ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 1 }, scene);
 
+
+
+
+            ////
             return scene;
         };
 
