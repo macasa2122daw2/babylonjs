@@ -33,7 +33,6 @@
 <body>
 
     <canvas id="renderCanvas" touch-action="none"></canvas>
-
     <script>
         const canvas = document.getElementById("renderCanvas"); // Recoge el canvas con su ID
         const engine = new BABYLON.Engine(canvas, true); // Genera el motor 3D de Babylon JS
@@ -83,12 +82,11 @@
             }));
             /////////////////////////////////////////////////////////////////////////////
             const carro = BABYLON.SceneLoader.ImportMesh("", "sources/coche/", "camero-2010-low-poly.obj", scene, (newMeshes) => {
-            //const carro = BABYLON.SceneLoader.ImportMesh("", "sources/", "coche.obj", scene, (newMeshes) => {
+                //const carro = BABYLON.SceneLoader.ImportMesh("", "sources/", "mercedes.obj", scene, (newMeshes) => {
                 var coche = newMeshes[0];
 
                 //Scale the model down 
                 coche.scaling.scaleInPlace(15.1);
-       
                 //Lock camera on the character 
                 camera.lockedTarget = coche;
 
@@ -103,15 +101,15 @@
                         //Manage the movements of the character (e.g. position, direction)
                         if (inputMap["w"]) {
                             coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeed));
-                            if(heroSpeed<1.7){
-                                setTimeout(() => { heroSpeed=heroSpeed+0.10;}, 1000);
-                            } 
+                            if (heroSpeed < 1.7) {
+                                setTimeout(() => { heroSpeed = heroSpeed + 0.10; }, 1000);
+                            }
                         }
                         if (!inputMap["w"]) {
-                            heroSpeed = 0.03;  
+                            heroSpeed = 0.03;
                         }
                         if (inputMap["s"]) {
-                            coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeedBackwards*-10));
+                            coche.moveWithCollisions(coche.forward.scaleInPlace(heroSpeedBackwards * -10));
                         }
                         if (inputMap["a"]) {
                             coche.rotate(BABYLON.Vector3.Up(), -heroRotationSpeed);
@@ -124,7 +122,11 @@
                         }
                     }
                 });
-                
+                setInterval(() => {
+                    console.log(String(coche.position));
+                }, 50000);
+
+
             });
 
             // PRUEBAS //////////////////////////////////////
@@ -180,14 +182,28 @@
             advancedTexture.addControl(controlsblock);
             advancedTexture.addControl(button1);
             ////////////////////////////////////////////////
-            
+
             // Enable physics
             scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0), new BABYLON.OimoJSPlugin());
             ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 1 }, scene);
+
             //PRUEBAS
-            console.log(carro);
-            ////
+            //TEMPORIZADOR
+            var temporizador = new BABYLON.GUI.TextBlock("Contador", "Tiempo: "); //CREAMOS EL TEXTBLOCK CON EL MENSAJE
+            temporizador.color = "white"; //LE ASIGNAMOS UN COLOR AL TEXTO
+            temporizador.top = "-500px" //LO CUADRAMOS PARA QUE QUEDE ARRIBA
+            temporizador.left = "900px";
+            temporizador.fontSize = "35px";//TAMAÑO DEL TEXTO QUE USAREMOS
+            advancedTexture.addControl(temporizador);
+            var contador = 0;
+            setInterval(() => {
+                contador++;
+                temporizador.text = "Time : " + String(contador);
+            }, 1000);
+
+            //////////////////////7
             return scene;
+
         };
 
         const scene = createScene(); //Call the createScene function
