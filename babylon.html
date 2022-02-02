@@ -87,6 +87,11 @@
 
                 //Scale the model down 
                 coche.scaling.scaleInPlace(15.1);
+
+                //COCHE POSICION INCIIAL
+                coche.position.x = -397.87830122053685;
+                coche.position.z = 442.5038130315103;
+                coche.rotation.y = 0.7;
                 //Lock camera on the character 
                 camera.lockedTarget = coche;
 
@@ -120,17 +125,30 @@
                         if (inputMap["b"]) {
                             sonidoclaxon.play();
                         }
+
                     }
+
                 });
                 setInterval(() => {
                     console.log(String(coche.position));
-                }, 50000);
+                }, 10);
 
 
             });
 
             // PRUEBAS //////////////////////////////////////
+            //ARRAY QUE CONSIGUE PILLAR CORDENADAS DE CHECKPOINT1
+            for (var i = -285.966316247101; i <= -435.7443352794695; i - 10) {
+                var checkpoint = [];
+                checkpoint1.push(i);
 
+            }
+            console.log(checkpoint[0]);
+
+
+            /*if(carro.position= checkpoint1[0]){
+                   console.log("Posicio Trobada");
+               }*/
             /////////////////////////////////////////////////
             //FUNCION QUE HARA QUE CUANDO LE DES AL BOTON SE ENCIENDA EL MOTOR
             //AUDIO DEL MOTOR
@@ -152,6 +170,11 @@
                 } else {
                     motor = true;
                     sonidomotor.play();
+                    var contador = 0;
+                    setInterval(() => {
+                        contador++;
+                        temporizador.text = "Time : " + String(contador);
+                    }, 1000);
                     button1.background = "green";
                 }
             }
@@ -195,11 +218,7 @@
             temporizador.left = "900px";
             temporizador.fontSize = "35px";//TAMAÑO DEL TEXTO QUE USAREMOS
             advancedTexture.addControl(temporizador);
-            var contador = 0;
-            setInterval(() => {
-                contador++;
-                temporizador.text = "Time : " + String(contador);
-            }, 1000);
+
 
             //////////////////////7
             return scene;
