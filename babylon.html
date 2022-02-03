@@ -130,15 +130,30 @@
                     }
 
                 });
-                setInterval(() => {
-                    console.log(String(coche.position._z));
-                    if (coche.position._x < -390 && coche.position._x > -420) {
+                function Esperar7segundos() {
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            resolve('Comienza Funcion de meta');
+                        }, 7000);
+                    });
+                }
+                async function asyncCall() {
+                    console.log('calling');
+                    const result = await Esperar7segundos();
+                    console.log(result);
+                    // expected output: "resolved"
+                    setInterval(() => {
+                    if (coche.position._x < -290 && coche.position._x > -420) {
                         if (coche.position._z > 445.78751757094886 && coche.position._z < 583) {
                             console.log(contador);
                             console.log(String(coche.position._x));
                         }
                     }
                 }, 50);
+                }
+                asyncCall();
+
+                
 
 
             });
