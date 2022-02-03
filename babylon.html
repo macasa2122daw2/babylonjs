@@ -81,6 +81,7 @@
                 inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
             }));
             /////////////////////////////////////////////////////////////////////////////
+            var contador = 0;
             const carro = BABYLON.SceneLoader.ImportMesh("", "sources/coche/", "camero-2010-low-poly.obj", scene, (newMeshes) => {
                 //const carro = BABYLON.SceneLoader.ImportMesh("", "sources/", "mercedes.obj", scene, (newMeshes) => {
                 var coche = newMeshes[0];
@@ -130,20 +131,19 @@
 
                 });
                 setInterval(() => {
-                    console.log(String(coche.position));
-                }, 10);
+                    console.log(String(coche.position._z));
+                    if (coche.position._x < -390 && coche.position._x > -420) {
+                        if (coche.position._z > 445.78751757094886 && coche.position._z < 583) {
+                            console.log(contador);
+                            console.log(String(coche.position._x));
+                        }
+                    }
+                }, 50);
 
 
             });
 
             // PRUEBAS //////////////////////////////////////
-            //ARRAY QUE CONSIGUE PILLAR CORDENADAS DE CHECKPOINT1
-            for (var i = -285.966316247101; i <= -435.7443352794695; i - 10) {
-                var checkpoint = [];
-                checkpoint1.push(i);
-
-            }
-            console.log(checkpoint[0]);
 
 
             /*if(carro.position= checkpoint1[0]){
@@ -170,10 +170,10 @@
                 } else {
                     motor = true;
                     sonidomotor.play();
-                    var contador = 0;
                     setInterval(() => {
                         contador++;
                         temporizador.text = "Time : " + String(contador);
+
                     }, 1000);
                     button1.background = "green";
                 }
